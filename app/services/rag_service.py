@@ -131,8 +131,7 @@ class RAGService:
             logger.error(f"Error in RAG pipeline: {str(e)}")
             raise
     
-    def _store_query_results(self, document_url: str, document_name: str, questions: List[str], 
-                           retrieved_chunks: List[Dict], answers: List[str], processing_time: int):
+    def _store_query_results(self, document_url: str, document_name: str, questions: List[str], retrieved_chunks: List[Dict], answers: List[str], processing_time: int):
         """Store query results in PostgreSQL database."""
         db = SessionLocal()
         try:
