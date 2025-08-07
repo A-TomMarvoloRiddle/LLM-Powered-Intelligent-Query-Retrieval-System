@@ -17,7 +17,7 @@ pinecone-client==2.2.4
 groq==0.31.0
 openai==1.99.2
 requests==2.31.0
-aiofiles==0.24.0
+aiofiles==24.1.0
 pandas==2.1.4
 numpy==1.26.4
 huggingface_hub==0.16.4
