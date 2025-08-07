@@ -18,7 +18,7 @@ class LLMService:
             # Create prompt
             prompt = f"""Based on the following context from a policy document, answer the question accurately and concisely. 
 Only use information that is explicitly stated in the context. If the answer cannot be found in the context, state that clearly.
-Answer in a professional tone & in very concise manner. Also state the reference to the context chunk used in the answer.
+Also state the reference to the context chunk used in the answer.
 
 Context:
 {context}
@@ -31,7 +31,7 @@ Answer:"""
             response = self.groq_client.chat.completions.create(
                 model="llama3-8b-8192",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that answers questions based on provided context from policy documents. Always ground your answers in the provided context. Avoid making assumptions or providing information not present in the context."},
+                    {"role": "system", "content": "You are a helpful assistant that answers questions based on provided context from policy documents. Always ground your answers in the provided context. Avoid making assumptions"},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=500,
