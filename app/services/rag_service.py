@@ -13,15 +13,15 @@ class RAGService:
         self.vector_store = VectorStore()
         self.llm_service = LLMService()
     
-    async def process_document_and_questions(self, document_url: str, 
-                                           questions: List[str]) -> Dict[str, Any]:
+    def process_document_and_questions(self, document_url: str, 
+                                     questions: List[str]) -> Dict[str, Any]:
         """Main RAG pipeline."""
         start_time = time.time()
         
         try:
             # Step 1: Parse PDF
             logger.info("Step 1: Parsing PDF...")
-            parsed_text = await self.pdf_parser.parse_pdf_from_url(document_url)
+            parsed_text = self.pdf_parser.parse_pdf_from_url(document_url)
             
             # Step 2: Chunk text
             logger.info("Step 2: Chunking text...")

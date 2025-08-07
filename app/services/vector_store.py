@@ -1,4 +1,4 @@
-import pinecone
+from pinecone import Pinecone
 from typing import List, Dict, Any, Tuple
 from app.config.settings import settings
 from app.utils.logger import logger
@@ -7,26 +7,26 @@ import time
 
 class VectorStore:
     def __init__(self):
-        # Initialize Pinecone
-        pinecone.init(
-            api_key=settings.pinecone_api_key,
-            environment=settings.pinecone_environment
-        )
-        
+        # Initialize Pinecone client
+        self.pc = Pinecone(api_key=settings.pinecone_api_key)
         self.index_name = settings.pinecone_index_name
         
         # Create index if it doesn't exist
-        if self.index_name not in pinecone.list_indexes():
+        if not self.pc.has_index(self.index_name):
             logger.info(f"Creating Pinecone index: {self.index_name}")
-            pinecone.create_index(
+            self.pc.create_index_for_model(
                 name=self.index_name,
-                dimension=384,  # all-MiniLM-L6-v2 dimension
-                metric="cosine"
+                cloud="aws",
+                region="us-east-1",
+                embed={
+                    "model": "llama-text-embed-v2",
+                    "field_map": {"text": "chunk_text"}
+                }
             )
             # Wait for index to be ready
             time.sleep(10)
         
-        self.index = pinecone.Index(self.index_name)
+        self.index = self.pc.Index(self.index_name)
     
     def store_embeddings(self, chunks: List[str], embeddings: List[List[float]], 
                         document_url: str) -> List[str]:
@@ -43,7 +43,7 @@ class VectorStore:
                     "id": chunk_id,
                     "values": embedding,
                     "metadata": {
-                        "text": chunk,
+                        "chunk_text": chunk,
                         "document_url": document_url,
                         "chunk_index": i
                     }
@@ -76,7 +76,7 @@ class VectorStore:
             retrieved_chunks = []
             for match in results.matches:
                 retrieved_chunks.append({
-                    "text": match.metadata["text"],
+                    "text": match.metadata["chunk_text"],
                     "score": float(match.score),
                     "document_url": match.metadata["document_url"],
                     "chunk_index": match.metadata["chunk_index"]

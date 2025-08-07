@@ -37,7 +37,7 @@ async def evaluate_document(
         logger.info(f"Number of questions: {len(request.questions)}")
         
         # Process document and questions
-        result = await rag_service.process_document_and_questions(
+        result = rag_service.process_document_and_questions(
             request.documents, request.questions
         )
         

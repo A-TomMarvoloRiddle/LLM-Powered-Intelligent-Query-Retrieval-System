@@ -8,7 +8,6 @@ class Settings(BaseSettings):
     
     # Vector Database
     pinecone_api_key: str
-    pinecone_environment: str
     pinecone_index_name: str
     
     # LLM Providers

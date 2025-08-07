@@ -1,10 +1,14 @@
 import requests
 import tempfile
 import os
+import asyncio
+import threading
 from llama_parse import LlamaParse
 from typing import List
 from app.config.settings import settings
 from app.utils.logger import logger
+
+
 
 class PDFParser:
     def __init__(self):
@@ -14,8 +18,8 @@ class PDFParser:
             verbose=True
         )
     
-    async def parse_pdf_from_url(self, pdf_url: str) -> str:
-        """Download PDF from URL and parse it using LlamaParse."""
+    def parse_pdf_from_url(self, pdf_url: str) -> str:
+        """Download PDF from URL and parse it using LlamaParse in a separate thread."""
         try:
             logger.info(f"Downloading PDF from URL: {pdf_url}")
             
@@ -29,15 +33,12 @@ class PDFParser:
                 temp_path = temp_file.name
             
             try:
-                # Parse PDF
+                # Parse PDF in a separate thread to avoid event loop issues
                 logger.info("Parsing PDF with LlamaParse...")
-                documents = self.parser.load_data(temp_path)
+                result = self._parse_in_thread(temp_path)
                 
-                # Combine all text
-                parsed_text = "\n\n".join([doc.text for doc in documents])
-                logger.info(f"Successfully parsed PDF. Total length: {len(parsed_text)} characters")
-                
-                return parsed_text
+                logger.info(f"Successfully parsed PDF. Total length: {len(result)} characters")
+                return result
                 
             finally:
                 # Clean up temporary file
@@ -46,3 +47,29 @@ class PDFParser:
         except Exception as e:
             logger.error(f"Error parsing PDF: {str(e)}")
             raise Exception(f"Failed to parse PDF: {str(e)}")
+    
+    def _parse_in_thread(self, temp_path: str) -> str:
+        """Run LlamaParse in a separate thread with its own event loop."""
+        result = [None]  # Use list to store result
+        
+        def parse_pdf():
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                documents = self.parser.load_data(temp_path)
+                parsed_text = "\n\n".join([doc.text for doc in documents])
+                result[0] = parsed_text
+            except Exception as e:
+                result[0] = f"Error: {str(e)}"
+            finally:
+                loop.close()
+        
+        # Run in thread
+        thread = threading.Thread(target=parse_pdf)
+        thread.start()
+        thread.join()
+        
+        if result[0] and result[0].startswith("Error:"):
+            raise Exception(result[0])
+        
+        return result[0]
