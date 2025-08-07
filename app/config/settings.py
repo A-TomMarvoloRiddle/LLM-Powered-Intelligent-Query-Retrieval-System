@@ -9,11 +9,10 @@ class Settings(BaseSettings):
     # Vector Database
     pinecone_api_key: str
     pinecone_environment: str
-    pinecone_index_name: str = "rag-embeddings"
+    pinecone_index_name: str
     
     # LLM Providers
-    groq_api_key: Optional[str] = None
-    openrouter_api_key: Optional[str] = None
+    groq_api_key: str
     
     # LlamaParse
     llama_parse_api_key: str
@@ -30,6 +29,6 @@ class Settings(BaseSettings):
     top_k: int = 5
     
     class Config:
-        env_file = ".env"
+        env_file = "LLM-Powered-Intelligent-Query-Retrieval-System/.env"
 
 settings = Settings()
