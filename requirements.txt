@@ -14,7 +14,7 @@ llama-index-embeddings-huggingface
 llama-index-embeddings-openai
 llama-index-llms-openai
 sentence-transformers
-pinecone-client
+pinecone
 groq
 openai
 requests
