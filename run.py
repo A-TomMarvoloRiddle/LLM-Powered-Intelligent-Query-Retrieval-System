@@ -1,11 +1,15 @@
+import os
 import uvicorn
 from app.main import app
 
 if __name__ == "__main__":
+    # Get port from environment variable (Render provides this)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Starting server on 0.0.0.0:{port}")
     uvicorn.run(
-        "app.main:app",
+        app,  # Pass the app object directly, not as string
         host="0.0.0.0",
-        port=10000,
-        reload=True,
+        port=port,
+        reload=False,  # Don't use reload in production
         log_level="info"
     )
