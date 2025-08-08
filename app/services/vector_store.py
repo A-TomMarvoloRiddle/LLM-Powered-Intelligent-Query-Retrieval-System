@@ -1,4 +1,4 @@
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 from typing import List, Dict, Any, Tuple
 from app.config.settings import settings
 from app.utils.logger import logger
@@ -16,16 +16,18 @@ class VectorStore:
             logger.info(f"Creating Pinecone index: {self.index_name}")
             self.pc.create_index(
                 name=self.index_name,
-                cloud="aws",
                 metric="cosine",
-                region="us-east-1",
+                spec=ServerlessSpec(
+                    cloud="aws",
+                    region="us-east-1"
+                ),
                 embed={
                     "model": "llama-text-embed-v2",
                     "field_map": {"text": "chunk_text"}
                 }
             )
             # Wait for index to be ready
-            time.sleep(10)
+            time.sleep(5)
         
         self.index = self.pc.Index(self.index_name)
     
