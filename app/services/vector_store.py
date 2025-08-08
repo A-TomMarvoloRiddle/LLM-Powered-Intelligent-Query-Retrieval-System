@@ -14,7 +14,7 @@ class VectorStore:
         # Create index if it doesn't exist
         if self.index_name not in self.pc.list_indexes():
             logger.info(f"Creating Pinecone index: {self.index_name}")
-            self.pc.create_index_for_model(
+            self.pc.create_index(
                 name=self.index_name,
                 cloud="aws",
                 metric="cosine",
