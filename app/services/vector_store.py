@@ -11,8 +11,11 @@ class VectorStore:
         self.pc = Pinecone(api_key=settings.pinecone_api_key)
         self.index_name = settings.pinecone_index_name
         
-        # Create index if it doesn't exist
-        if self.index_name not in self.pc.list_indexes():
+        # Check if index exists before creating
+        existing_indexes = self.pc.list_indexes()
+        index_names = [index['name'] for index in existing_indexes]
+        
+        if self.index_name not in index_names:
             logger.info(f"Creating Pinecone index: {self.index_name}")
             self.pc.create_index(
                 name=self.index_name,
