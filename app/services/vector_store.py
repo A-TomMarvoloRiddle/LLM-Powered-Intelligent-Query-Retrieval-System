@@ -16,16 +16,14 @@ class VectorStore:
             logger.info(f"Creating Pinecone index: {self.index_name}")
             self.pc.create_index(
                 name=self.index_name,
+                dimension=384,
                 metric="cosine",
                 spec=ServerlessSpec(
                     cloud="aws",
                     region="us-east-1"
-                ),
-                embed={
-                    "model": "llama-text-embed-v2",
-                    "field_map": {"text": "chunk_text"}
-                }
+                )
             )
+
             # Wait for index to be ready
             time.sleep(5)
         
