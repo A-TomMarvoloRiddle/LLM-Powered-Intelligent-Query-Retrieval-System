@@ -4,7 +4,7 @@ from app.main import app
 
 if __name__ == "__main__":
     # Get port from environment variable (Render provides this)
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 10000))
     print(f"Starting server on 0.0.0.0:{port}")
     uvicorn.run(
         app,  # Pass the app object directly, not as string

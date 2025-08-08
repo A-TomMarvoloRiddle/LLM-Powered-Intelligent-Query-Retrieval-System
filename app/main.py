@@ -29,7 +29,7 @@ async def root():
         "version": "1.0.0",
         "status": "healthy",
         "timestamp": time.time(),
-        "port": os.environ.get("PORT", "8000")
+        "port": os.environ.get("PORT", "10000")
     }
 
 @app.get("/health")
@@ -38,7 +38,7 @@ async def health_check():
         "status": "healthy", 
         "timestamp": time.time(),
         "service": "rag-system",
-        "port": os.environ.get("PORT", "8000")
+        "port": os.environ.get("PORT", "10000")
     }
 
 # Try to import routes, but don't fail if they don't exist
@@ -80,7 +80,7 @@ except ImportError:
 async def startup_event():
     log_func("Starting RAG System API...")
     log_func(f"Environment: {environment}")
-    port = os.environ.get("PORT", "8000")
+    port = os.environ.get("PORT", "10000")
     log_func(f"Server will run on port: {port}")
 
 @app.on_event("shutdown")
@@ -89,6 +89,6 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 10000))
     print(f"Running directly - starting on 0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
