@@ -1,4 +1,5 @@
 import os
+import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,18 +21,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Basic health check endpoint
+# Basic health check endpoint (always available)
 @app.get("/")
 async def root():
     return {
         "message": "RAG System API is running",
         "version": "1.0.0",
-        "status": "healthy"
+        "status": "healthy",
+        "timestamp": time.time(),
+        "port": os.environ.get("PORT", "8000")
     }
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy", 
+        "timestamp": time.time(),
+        "service": "rag-system",
+        "port": os.environ.get("PORT", "8000")
+    }
 
 # Try to import routes, but don't fail if they don't exist
 try:
@@ -41,6 +49,16 @@ try:
 except ImportError as e:
     print(f"⚠️ Could not load API routes: {e}")
     print("Running with basic endpoints only")
+
+    # Add a simple endpoint to indicate the issue
+    @app.get("/status")
+    async def service_status():
+        return {
+            "status": "partial",
+            "message": "Basic endpoints only - RAG services unavailable",
+            "error": str(e),
+            "timestamp": time.time()
+        }
 
 # Try to import settings, but use defaults if not available
 try:
