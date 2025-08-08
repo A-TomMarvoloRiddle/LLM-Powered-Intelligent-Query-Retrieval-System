@@ -12,11 +12,12 @@ class VectorStore:
         self.index_name = settings.pinecone_index_name
         
         # Create index if it doesn't exist
-        if not self.pc.has_index(self.index_name):
+        if self.index_name not in self.pc.list_indexes():
             logger.info(f"Creating Pinecone index: {self.index_name}")
             self.pc.create_index_for_model(
                 name=self.index_name,
                 cloud="aws",
+                metric="cosine",
                 region="us-east-1",
                 embed={
                     "model": "llama-text-embed-v2",
