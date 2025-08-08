@@ -20,9 +20,13 @@ class EmbeddingService:
             raise
     
     def embed_batch(self, texts: List[str]) -> List[List[float]]:
+        print(f"Generating embeddings for {len(texts)} texts")
         """Generate embeddings for multiple texts."""
         try:
             embeddings = self.model.encode(texts)
+            print(f"Generated embeddings for {len(embeddings)} texts")
+            if len(embeddings) == 0:
+                raise ValueError("No embeddings generated. Check input texts.")
             return embeddings.tolist()
         except Exception as e:
             logger.error(f"Error generating batch embeddings: {str(e)}")
