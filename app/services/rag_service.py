@@ -52,6 +52,9 @@ class RAGService:
         doc_name = self._extract_document_name(document_url)
         
         try:
+            logger.info(f"Starting RAG pipeline for document: {document_url}")
+            logger.info(f"Questions to process: {len(questions)}")
+            
             # Check if document already exists in PostgreSQL
             if self.document_exists_in_db(document_url):
                 logger.info(f"Document already exists in database. Skipping parsing and storage.")
