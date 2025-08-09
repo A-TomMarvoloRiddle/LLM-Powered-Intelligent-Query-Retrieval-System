@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     bearer_token: str
     
     # App Settings
-    environment: str = "development"
+    environment: str = "production"
     log_level: str = "INFO"
     embedding_model: str = "all-MiniLM-L6-v2"
     chunk_size: int = 512
