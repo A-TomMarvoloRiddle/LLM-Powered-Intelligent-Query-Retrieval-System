@@ -23,6 +23,7 @@ class EmbeddingService:
         print(f"Generating embeddings for {len(texts)} texts")
         """Generate embeddings for multiple texts."""
         try:
+            print("Starting batch embedding generation...")
             embeddings = self.model.encode(texts)
             print(f"Generated embeddings for {len(embeddings)} texts")
             if len(embeddings) == 0:
