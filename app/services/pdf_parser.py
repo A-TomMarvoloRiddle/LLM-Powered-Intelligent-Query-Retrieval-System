@@ -8,8 +8,6 @@ from typing import List
 from app.config.settings import settings
 from app.utils.logger import logger
 
-
-
 class PDFParser:
     def __init__(self):
         self.parser = LlamaParse(

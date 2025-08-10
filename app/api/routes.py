@@ -27,7 +27,7 @@ async def evaluate_document(
                 detail="Questions list cannot be empty"
             )
         
-        if len(request.questions) > 20:  # Reasonable limit
+        if len(request.questions) > 20: 
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Too many questions. Maximum 20 questions allowed."
