@@ -92,3 +92,43 @@ class VectorStore:
         except Exception as e:
             logger.error(f"Error searching vectors: {str(e)}")
             raise
+
+    def get_document_chunks(self, document_url: str) -> List[Dict[str, Any]]:
+        """Retrieve all chunks for a specific document from Pinecone."""
+        try:
+            # Use a dummy query vector to fetch all chunks for the document
+            # Pinecone doesn't support filtering by metadata directly in query, 
+            # so we'll use a hybrid approach
+            
+            # First, try to get chunks by searching with a dummy vector and filtering
+            dummy_vector = [0.0] * 384  # Same dimension as embeddings
+            
+            # Get a large number of results to capture all chunks for this document
+            results = self.index.query(
+                vector=dummy_vector,
+                top_k=10000,  # Large number to get all chunks
+                include_metadata=True,
+                filter={
+                    "document_url": {"$eq": document_url}
+                }
+            )
+            
+            document_chunks = []
+            for match in results.matches:
+                document_chunks.append({
+                    "text": match.metadata["chunk_text"],
+                    "document_url": match.metadata["document_url"],
+                    "chunk_index": match.metadata["chunk_index"],
+                    "chunk_id": match.id
+                })
+            
+            # Sort by chunk_index to maintain document order
+            document_chunks.sort(key=lambda x: x["chunk_index"])
+            
+            logger.info(f"Retrieved {len(document_chunks)} chunks for document: {document_url}")
+            return document_chunks
+            
+        except Exception as e:
+            logger.error(f"Error retrieving document chunks for {document_url}: {str(e)}")
+            # Return empty list if no chunks found or error occurs
+            return []
