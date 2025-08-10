@@ -118,25 +118,25 @@ except Exception as e:
     logger.error(f"⚠️ Could not load API routes: {e}")
     
     # Add fallback endpoints
-    @app.get("/ready")
-    async def ready_check():
-        return {
-            "status": "degraded",
-            "message": "Basic endpoints only - RAG services may be initializing",
-            "error": str(e),
-            "timestamp": time.time()
-        }
+#    @app.get("/ready")
+#    async def ready_check():
+#        return {
+#            "status": "degraded",
+#            "message": "Basic endpoints only - RAG services may be initializing",
+#            "error": str(e),
+#            "timestamp": time.time()
+#        }
     
-    @app.post("/hackrx/run")
-    async def fallback_endpoint():
-        return JSONResponse(
-            status_code=503,
-            content={
-                "error": "RAG services are initializing",
-                "message": "Please try again in a few moments",
-                "timestamp": time.time()
-            }
-        )
+#    @app.post("/hackrx/run")
+#    async def fallback_endpoint():
+#        return JSONResponse(
+#            status_code=503,
+#            content={
+#                "error": "RAG services are initializing",
+#                "message": "Please try again in a few moments",
+#                "timestamp": time.time()
+#            }
+#        )
 
 # Load environment settings
 try:
@@ -146,6 +146,14 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Could not load settings: {e}")
     environment = "production"
+
+# Try to import logger, but use print if not available
+try:
+    from app.utils.logger import logger
+    log_func = logger.info
+except ImportError:
+    print("⚠️ Could not load logger, using print")
+    log_func = print
 
 # Startup and shutdown events
 @app.on_event("startup")
@@ -179,4 +187,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8080))
     logger.info(f"🔧 Running in development mode on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
