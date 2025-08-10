@@ -1,9 +1,15 @@
 import os
 import time
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import logging
 
-# Create FastAPI app first
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Create FastAPI app
 app = FastAPI(
     title="RAG System API",
     description="Production-ready RAG system for policy document analysis",
@@ -21,74 +27,156 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Basic health check endpoint (always available)
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    
+    logger.info(
+        f"Method: {request.method} | "
+        f"URL: {request.url} | "
+        f"Status: {response.status_code} | "
+        f"Process Time: {process_time:.4f}s"
+    )
+    return response
+
+# Root endpoint
 @app.get("/")
 async def root():
     return {
-        "message": "RAG System API is running",
+        "message": "🚀 RAG System API is running on Google Cloud Run",
         "version": "1.0.0",
         "status": "healthy",
         "timestamp": time.time(),
-        "port": os.environ.get("PORT", "10000")
+        "environment": os.environ.get("ENVIRONMENT", "production"),
+        "docs_url": "/docs",
+        "api_endpoint": "/hackrx/run"
     }
 
+# Health check endpoint (required for Cloud Run)
 @app.get("/health")
 async def health_check():
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "timestamp": time.time(),
         "service": "rag-system",
-        "port": os.environ.get("PORT", "10000")
+        "platform": "gcp-cloud-run",
+        "port": os.environ.get("PORT", "8080")
     }
 
-# Try to import routes, but don't fail if they don't exist
-try:
-    from app.api.routes import router
-    app.include_router(router)
-    print("✓ API routes loaded successfully")
-except ImportError as e:
-    print(f"⚠️ Could not load API routes: {e}")
-    print("Running with basic endpoints only")
-
-    # Add a simple endpoint to indicate the issue
-    @app.get("/status")
-    async def service_status():
+# Startup status endpoint
+@app.get("/status")
+async def service_status():
+    try:
+        # Try to import settings
+        from app.config.settings import settings
+        environment = settings.environment
+        
+        return {
+            "status": "ready",
+            "message": "All services operational",
+            "environment": environment,
+            "timestamp": time.time(),
+            "endpoints": {
+                "main_api": "/hackrx/run",
+                "health": "/health", 
+                "docs": "/docs",
+                "queries": "/queries"
+            }
+        }
+    except Exception as e:
         return {
             "status": "partial",
-            "message": "Basic endpoints only - RAG services unavailable",
+            "message": "Basic endpoints only - Some services may be initializing",
             "error": str(e),
             "timestamp": time.time()
         }
 
-# Try to import settings, but use defaults if not available
+# Initialize services and routes
+logger.info("🔧 Initializing RAG System on Cloud Run...")
+
+# Try to load routes with proper error handling
+try:
+    logger.info("📡 Loading API routes...")
+    from app.api.routes import router
+    app.include_router(router)
+    logger.info("✅ API routes loaded successfully")
+    
+    # Success endpoint
+    @app.get("/ready")
+    async def ready_check():
+        return {
+            "status": "ready",
+            "message": "RAG System fully operational",
+            "timestamp": time.time(),
+            "all_services": "loaded"
+        }
+        
+except Exception as e:
+    logger.error(f"⚠️ Could not load API routes: {e}")
+    
+    # Add fallback endpoints
+    @app.get("/ready")
+    async def ready_check():
+        return {
+            "status": "degraded",
+            "message": "Basic endpoints only - RAG services may be initializing",
+            "error": str(e),
+            "timestamp": time.time()
+        }
+    
+    @app.post("/hackrx/run")
+    async def fallback_endpoint():
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "RAG services are initializing",
+                "message": "Please try again in a few moments",
+                "timestamp": time.time()
+            }
+        )
+
+# Load environment settings
 try:
     from app.config.settings import settings
     environment = settings.environment
-except ImportError:
-    print("⚠️ Could not load settings, using defaults")
-    environment = "development"
+    logger.info(f"🌍 Environment: {environment}")
+except ImportError as e:
+    logger.warning(f"⚠️ Could not load settings: {e}")
+    environment = "production"
 
-# Try to import logger, but use print if not available
-try:
-    from app.utils.logger import logger
-    log_func = logger.info
-except ImportError:
-    print("⚠️ Could not load logger, using print")
-    log_func = print
-
+# Startup and shutdown events
 @app.on_event("startup")
 async def startup_event():
-    log_func("Starting RAG System API...")
-    log_func(f"Environment: {environment}")
-    port = os.environ.get("PORT", "10000")
-    log_func(f"Server will run on port: {port}")
+    port = os.environ.get("PORT", "8080")
+    logger.info("🚀 Starting RAG System API on Google Cloud Run...")
+    logger.info(f"🌍 Environment: {environment}")
+    logger.info(f"🔌 Server running on port: {port}")
+    logger.info(f"📚 API Documentation: https://your-service-url/docs")
+    logger.info(f"🔍 Health Check: https://your-service-url/health")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    log_func("Shutting down RAG System API...")
+    logger.info("🛑 Shutting down RAG System API...")
 
+# Exception handlers
+@app.exception_handler(500)
+async def internal_server_error(request: Request, exc: Exception):
+    logger.error(f"Internal Server Error: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "message": "Something went wrong. Please try again later.",
+            "timestamp": time.time()
+        }
+    )
+
+# For local development
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 10000))
-    print(f"Running directly - starting on 0.0.0.0:{port}")
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
+    port = int(os.environ.get("PORT", 8080))
+    logger.info(f"🔧 Running in development mode on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
