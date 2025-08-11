@@ -42,18 +42,11 @@ async def log_requests(request: Request, call_next):
     )
     return response
 
-# Root endpoint
+# Root endpoint - redirect to API endpoint
 @app.get("/")
 async def root():
-    return {
-        "message": "🚀 RAG System API is running on Google Cloud Run",
-        "version": "1.0.0",
-        "status": "healthy",
-        "timestamp": time.time(),
-        "environment": os.environ.get("ENVIRONMENT", "production"),
-        "docs_url": "/docs",
-        "api_endpoint": "/hackrx/run"
-    }
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/hackrx/run", status_code=307)
 
 # Health check endpoint (required for Cloud Run)
 @app.get("/health")
