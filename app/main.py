@@ -42,11 +42,18 @@ async def log_requests(request: Request, call_next):
     )
     return response
 
-# Root endpoint - redirect to API endpoint
+# Root endpoint
 @app.get("/")
 async def root():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/hackrx/run", status_code=308)
+    return {
+        "message": "🚀 RAG System API is running on Google Cloud Run",
+        "version": "1.0.0",
+        "status": "healthy",
+        "timestamp": time.time(),
+        "environment": os.environ.get("ENVIRONMENT", "production"),
+        "docs_url": "/docs",
+        "api_endpoint": "/hackrx/run"
+    }
 
 # Health check endpoint (required for Cloud Run)
 @app.get("/health")
@@ -111,25 +118,25 @@ except Exception as e:
     logger.error(f"⚠️ Could not load API routes: {e}")
     
     # Add fallback endpoints
-#    @app.get("/ready")
-#    async def ready_check():
-#        return {
-#            "status": "degraded",
-#            "message": "Basic endpoints only - RAG services may be initializing",
-#            "error": str(e),
-#            "timestamp": time.time()
-#        }
+    @app.get("/ready")
+    async def ready_check():
+        return {
+            "status": "degraded",
+            "message": "Basic endpoints only - RAG services may be initializing",
+            "error": str(e),
+            "timestamp": time.time()
+        }
     
-#    @app.post("/hackrx/run")
-#    async def fallback_endpoint():
-#        return JSONResponse(
-#            status_code=503,
-#            content={
-#                "error": "RAG services are initializing",
-#                "message": "Please try again in a few moments",
-#                "timestamp": time.time()
-#            }
-#        )
+    @app.post("/hackrx/run")
+    async def fallback_endpoint():
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "RAG services are initializing",
+                "message": "Please try again in a few moments",
+                "timestamp": time.time()
+            }
+        )
 
 # Load environment settings
 try:
