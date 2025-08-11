@@ -46,7 +46,7 @@ async def log_requests(request: Request, call_next):
 @app.get("/")
 async def root():
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/hackrx/run", status_code=307)
+    return RedirectResponse(url="/hackrx/run", status_code=308)
 
 # Health check endpoint (required for Cloud Run)
 @app.get("/health")
