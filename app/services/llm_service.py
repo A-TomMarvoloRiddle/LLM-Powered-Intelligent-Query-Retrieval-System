@@ -16,9 +16,9 @@ class LLMService:
             context = "\n\n".join([chunk["text"] for chunk in context_chunks])
             
             # Create prompt
-            prompt = f"""Based on the following context from a policy document, answer the question accurately and concisely. 
+            prompt = f"""Based on the following context from a policy document, answer the question accurately and very concisely. 
 Only use information that is explicitly stated in the context. If the answer cannot be found in the context, state that clearly.
-Also state the reference to the context chunk used in the answer.
+Also state the reference to the context used to generate the answer (mention the specific clause from the policy document).
 
 Context:
 {context}
@@ -31,7 +31,7 @@ Answer:"""
             response = self.groq_client.chat.completions.create(
                 model="llama3-8b-8192",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that answers questions based on provided context from policy documents. Always ground your answers in the provided context. Avoid making assumptions"},
+                    {"role": "system", "content": "You are a helpful assistant that answers questions based on provided context from policy documents. Always ground your answers in the provided context. DO NOT make assumptions"},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=500,
