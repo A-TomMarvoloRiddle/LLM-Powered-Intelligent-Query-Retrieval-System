@@ -30,10 +30,12 @@ steps:
       - '10'
       - '--max-instances'
       - '5'
+      - '--min-instances'
+      - '1' 
 
 images:
   - 'gcr.io/$PROJECT_ID/rag-system:$COMMIT_SHA'
 
 options:
   machineType: 'E2_HIGHCPU_8'
-  timeout: '1800s'
+  timeout: '2400s'

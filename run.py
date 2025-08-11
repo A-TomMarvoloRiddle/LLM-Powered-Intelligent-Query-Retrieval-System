@@ -32,7 +32,7 @@ def main():
         reload=False,
         log_level="info",
         access_log=True,
-        timeout_keep_alive=120,
+        timeout_keep_alive=300,
         # Cloud Run specific optimizations
         workers=1,  # Cloud Run manages scaling
         loop="asyncio",

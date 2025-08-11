@@ -26,9 +26,8 @@ class VectorStore:
                     region="us-east-1"
                 )
             )
-
             # Wait for index to be ready
-            time.sleep(5)
+            time.sleep(3)
         
         self.index = self.pc.Index(self.index_name)
     
