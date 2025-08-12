@@ -1,6 +1,7 @@
 # Production RAG System
 
 A production-ready Retrieval-Augmented Generation (RAG) system for policy document analysis using LlamaIndex, Pinecone, and FastAPI.
+### [Pitch Deck Link](https://1drv.ms/p/c/997174930b242a72/EYNvt2U7A_BBlBGnKIs1fhkBkfxIL-87XYE7G_sx4qLe0A?e=eeUqUD)
 
 ## Features
 
